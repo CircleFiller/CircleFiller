@@ -1,239 +1,234 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Dimensions, StyleSheet, PanResponder } from 'react-native';
-import { useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useRef } from 'react'
+import { View, Text, Pressable, StyleSheet, SafeAreaView } from 'react-native'
+import { useRouter, useLocalSearchParams } from 'expo-router'
+import { COLORS } from '../theme/colors'
+import { GameMode, Difficulty } from '../game/types'
+import { useGame } from '../hooks/useGame'
+import { useAI } from '../hooks/useAI'
+import { useSound } from '../hooks/useSound'
+import { Board } from '../components/Board'
+import { GameHeader } from '../components/GameHeader'
+import { GameOverModal } from '../components/GameOverModal'
 
-const { width, height } = Dimensions.get('window');
-
-interface Circle {
-  x: number;
-  y: number;
-  radius: number;
-  color: string;
+function CRTScanlines() {
+  return (
+    <View style={styles.scanlines} pointerEvents="none">
+      {Array.from({ length: 350 }).map((_, i) => (
+        <View key={i} style={styles.scanlineRow} />
+      ))}
+    </View>
+  )
 }
 
-const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'];
+export default function GameScreen() {
+  const router = useRouter()
+  const params = useLocalSearchParams<{ mode?: string; difficulty?: string }>()
+  const { playDrop, playWin } = useSound()
 
-export default function Game() {
-  const [circles, setCircles] = useState<Circle[]>([]);
-  const [currentCircle, setCurrentCircle] = useState<Circle | null>(null);
-  const [score, setScore] = useState(0);
-  const [isGameOver, setIsGameOver] = useState(false);
-  const router = useRouter();
-  
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const mode = (params.mode as GameMode) || 'ai'
+  const difficulty = (params.difficulty as Difficulty) || 'medium'
 
-  const checkCollision = (newCircle: Circle, existingCircles: Circle[]) => {
-    // Edge collision
-    if (
-      newCircle.x - newCircle.radius < 0 ||
-      newCircle.x + newCircle.radius > width ||
-      newCircle.y - newCircle.radius < 100 || // Offset for header
-      newCircle.y + newCircle.radius > height - 100 // Offset for footer
-    ) {
-      return true;
+  const { state, startGame, makeMove, goToMenu, resetGame } = useGame()
+  const prevPhaseRef = useRef(state.phase)
+  const prevMoveRef = useRef(state.moveCount)
+
+  // Auto-start game from params
+  useEffect(() => {
+    if (state.phase === 'menu') {
+      startGame(mode, difficulty)
     }
+  }, []) // Only on mount
 
-    // Other circles collision
-    for (const circle of existingCircles) {
-      const dist = Math.sqrt(
-        Math.pow(newCircle.x - circle.x, 2) + Math.pow(newCircle.y - circle.y, 2)
-      );
-      if (dist < newCircle.radius + circle.radius) {
-        return true;
-      }
+  // Play sounds on state changes
+  useEffect(() => {
+    if (state.moveCount > prevMoveRef.current) {
+      playDrop()
     }
-    return false;
-  };
+    prevMoveRef.current = state.moveCount
+  }, [state.moveCount, playDrop])
 
-  const startGrowing = (x: number, y: number) => {
-    if (isGameOver) return;
-
-    const newCircle: Circle = {
-      x,
-      y,
-      radius: 5,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
-    };
-
-    if (checkCollision(newCircle, circles)) {
-      setIsGameOver(true);
-      return;
+  useEffect(() => {
+    if (state.phase === 'won' && prevPhaseRef.current === 'playing') {
+      setTimeout(playWin, 300)
     }
+    prevPhaseRef.current = state.phase
+  }, [state.phase, playWin])
 
-    setCurrentCircle(newCircle);
+  const handleColumnPress = useCallback((col: number) => {
+    makeMove(col)
+  }, [makeMove])
 
-    timerRef.current = setInterval(() => {
-      setCurrentCircle((prev) => {
-        if (!prev) return null;
-        const next = { ...prev, radius: prev.radius + 2 };
-        if (checkCollision(next, circles)) {
-          stopGrowing();
-          setIsGameOver(true);
-          return prev;
-        }
-        return next;
-      });
-    }, 16);
-  };
+  const { isThinking } = useAI({
+    board: state.board,
+    currentPlayer: state.currentPlayer,
+    isPlaying: state.phase === 'playing',
+    isAIMode: state.mode === 'ai',
+    aiPlayer: 2,
+    difficulty: state.difficulty,
+    onMove: handleColumnPress,
+  })
 
-  const stopGrowing = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-    if (currentCircle) {
-      setCircles((prev) => [...prev, currentCircle]);
-      setScore((prev) => prev + Math.floor(currentCircle.radius));
-      setCurrentCircle(null);
-    }
-  };
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderGrant: (evt) => {
-        const { locationX, locationY } = evt.nativeEvent;
-        startGrowing(locationX, locationY);
-      },
-      onPanResponderRelease: () => {
-        stopGrowing();
-      },
-      onPanResponderTerminate: () => {
-        stopGrowing();
-      },
-    })
-  ).current;
-
-  const resetGame = () => {
-    setCircles([]);
-    setCurrentCircle(null);
-    setScore(0);
-    setIsGameOver(false);
-  };
+  const isPlayerTurn = state.phase === 'playing' && !isThinking
+  const gameOver = state.phase === 'won' || state.phase === 'draw'
 
   return (
-    <View style={styles.container} {...panResponder.panHandlers}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backButton}>← Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.score}>Score: {score}</Text>
-        <TouchableOpacity onPress={resetGame}>
-          <Text style={styles.resetButton}>Reset</Text>
-        </TouchableOpacity>
+    <SafeAreaView style={styles.container}>
+      {/* ── Top bar ── */}
+      <View style={styles.topBar}>
+        <Pressable
+          onPress={() => { goToMenu(); router.replace('/') }}
+          style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.6 }]}
+        >
+          <View style={styles.backIcon}>
+            <View style={styles.backChevronTop} />
+            <View style={styles.backChevronBot} />
+          </View>
+          <Text style={styles.backLabel}>EXIT</Text>
+        </Pressable>
+
+        <Text style={styles.titleText}>CIRCLE FILLER</Text>
+
+        <View style={styles.topBarRight} />
       </View>
 
-      {circles.map((circle, index) => (
-        <View
-          key={index}
-          style={[
-            styles.circle,
-            {
-              left: circle.x - circle.radius,
-              top: circle.y - circle.radius,
-              width: circle.radius * 2,
-              height: circle.radius * 2,
-              borderRadius: circle.radius,
-              backgroundColor: circle.color,
-            },
-          ]}
-        />
-      ))}
+      {/* Thin neon separator */}
+      <View style={styles.separator} />
 
-      {currentCircle && (
-        <View
-          style={[
-            styles.circle,
-            {
-              left: currentCircle.x - currentCircle.radius,
-              top: currentCircle.y - currentCircle.radius,
-              width: currentCircle.radius * 2,
-              height: currentCircle.radius * 2,
-              borderRadius: currentCircle.radius,
-              backgroundColor: currentCircle.color,
-              opacity: 0.7,
-            },
-          ]}
+      {/* ── Player header ── */}
+      <GameHeader
+        currentPlayer={state.currentPlayer}
+        mode={state.mode}
+        difficulty={state.difficulty}
+        scores={state.scores}
+        moveCount={state.moveCount}
+        aiThinking={isThinking}
+      />
+
+      {/* ── Board ── */}
+      <View style={styles.boardContainer}>
+        <Board
+          board={state.board}
+          winningCells={state.winningCells}
+          onColumnPress={handleColumnPress}
+          disabled={!isPlayerTurn}
+        />
+      </View>
+
+      {/* ── Game over modal ── */}
+      {gameOver && (
+        <GameOverModal
+          winner={state.winner}
+          mode={state.mode}
+          moveCount={state.moveCount}
+          onPlayAgain={resetGame}
+          onHome={() => {
+            goToMenu()
+            router.replace('/')
+          }}
         />
       )}
 
-      {isGameOver && (
-        <View style={styles.gameOverContainer}>
-          <Text style={styles.gameOverText}>Game Over!</Text>
-          <Text style={styles.finalScore}>Final Score: {score}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={resetGame}>
-            <Text style={styles.retryButtonText}>Try Again</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
+      {/* CRT overlay — excluded from game screen, interferes with board visibility */}
+    </SafeAreaView>
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: COLORS.bg,
   },
-  header: {
-    height: 100,
+
+  // ── Top bar ──
+  topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 40,
-    backgroundColor: '#333',
-    zIndex: 10,
+    paddingHorizontal: 16,
+    height: 44,
   },
-  backButton: {
-    color: '#fff',
-    fontSize: 18,
-  },
-  score: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  resetButton: {
-    color: '#fff',
-    fontSize: 18,
-  },
-  circle: {
-    position: 'absolute',
-  },
-  gameOverContainer: {
-    position: 'absolute',
-    top: '30%',
-    left: '10%',
-    right: '10%',
-    backgroundColor: 'rgba(0,0,0,0.9)',
-    padding: 30,
-    borderRadius: 20,
+  backBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FF6B6B',
-    zIndex: 100,
+    justifyContent: 'center',
+    gap: 6,
+    height: 44,
+    paddingHorizontal: 4,
+    minWidth: 70,
   },
-  gameOverText: {
-    color: '#FF6B6B',
-    fontSize: 40,
-    fontWeight: 'bold',
-    marginBottom: 10,
+  backIcon: {
+    width: 12,
+    height: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  finalScore: {
-    color: '#fff',
-    fontSize: 24,
-    marginBottom: 20,
+  backChevronTop: {
+    width: 8,
+    height: 1.5,
+    backgroundColor: COLORS.accent,
+    borderRadius: 1,
+    transform: [{ rotate: '-45deg' }, { translateY: 2 }],
+    shadowColor: COLORS.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 4,
+    shadowOpacity: 0.8,
   },
-  retryButton: {
-    backgroundColor: '#4ECDC4',
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 10,
+  backChevronBot: {
+    width: 8,
+    height: 1.5,
+    backgroundColor: COLORS.accent,
+    borderRadius: 1,
+    transform: [{ rotate: '45deg' }, { translateY: -2 }],
+    shadowColor: COLORS.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 4,
+    shadowOpacity: 0.8,
   },
-  retryButtonText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
+  backLabel: {
+    color: COLORS.accent,
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 2,
+    textShadowColor: COLORS.accent,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
   },
-});
+  titleText: {
+    color: COLORS.text,
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 5,
+    textShadowColor: COLORS.accent,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
+  },
+  topBarRight: {
+    minWidth: 70,
+  },
+
+  separator: {
+    height: 1,
+    backgroundColor: COLORS.cellBorder,
+    marginHorizontal: 16,
+    opacity: 0.5,
+  },
+
+  // ── Board ──
+  boardContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+  },
+
+  // ── CRT ──
+  scanlines: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  scanlineRow: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.15)',
+    marginBottom: 2,
+  },
+})

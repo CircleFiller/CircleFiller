@@ -1,50 +1,201 @@
+import React, { useEffect, useRef } from 'react'
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Animated } from 'react-native'
+import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import { Text, View, Pressable } from 'react-native'
-import { Link } from 'expo-router'
-import { useMobileWallet } from '@wallet-ui/react-native-kit'
+import { COLORS } from '../theme/colors'
+import { GameMode, Difficulty } from '../game/types'
+import { ModeSelector } from '../components/ModeSelector'
 
-export default function App() {
-  const { account, connect, disconnect } = useMobileWallet()
-
+function CRTScanlines() {
   return (
-    <View className="flex-1 bg-white dark:bg-black items-center justify-center px-8">
-      {/* Heading */}
-      <Text className="text-4xl font-extrabold text-gray-800 dark:text-white mb-3 tracking-tight">🚀 Welcome</Text>
-
-      {/* Subheading */}
-      <Text className="text-xl dark:text-white text-gray-700 mb-8 text-center leading-relaxed">
-        Build beautiful apps with <Text className="text-blue-500 font-semibold">Expo + Uniwind + @solana/kit 🔥</Text>
-      </Text>
-
-      <View className="mb-8 items-center">
-        <Link href="/game" asChild>
-          <Pressable className="bg-purple-600 px-8 py-4 rounded-2xl active:bg-purple-700 mb-4 shadow-lg">
-            <Text className="text-white font-black text-xl tracking-widest">PLAY CIRCLE FILLER ⭕</Text>
-          </Pressable>
-        </Link>
-        {account ? (
-          <View className="items-center">
-            <Text className="text-gray-600 dark:text-gray-400 mb-2">
-              Connected: {account.address.toString().slice(0, 8)}...
-            </Text>
-            <Pressable onPress={disconnect} className="bg-red-500 px-6 py-3 rounded-xl active:bg-red-600">
-              <Text className="text-white font-bold">Disconnect Wallet</Text>
-            </Pressable>
-          </View>
-        ) : (
-          <Pressable onPress={connect} className="bg-blue-600 px-6 py-3 rounded-xl active:bg-blue-700">
-            <Text className="text-white font-bold text-lg">Connect Wallet</Text>
-          </Pressable>
-        )}
-      </View>
-
-      {/* Instruction text */}
-      <Text className="text-base text-gray-600 dark:text-white text-center max-w-sm">
-        Start customizing your app by editing{' '}
-        <Text className="font-semibold text-gray-800 dark:text-white">app/index.tsx</Text>
-      </Text>
-
-      <StatusBar style="auto" />
+    <View style={styles.scanlines} pointerEvents="none">
+      {Array.from({ length: 350 }).map((_, i) => (
+        <View key={i} style={styles.scanlineRow} />
+      ))}
     </View>
   )
 }
+
+function CRTVignette() {
+  return <View style={styles.vignette} pointerEvents="none" />
+}
+
+export default function HomeScreen() {
+  const router = useRouter()
+  const titleGlow = useRef(new Animated.Value(0.6)).current
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(titleGlow, { toValue: 1, duration: 2000, useNativeDriver: true }),
+        Animated.timing(titleGlow, { toValue: 0.6, duration: 2000, useNativeDriver: true }),
+      ])
+    ).start()
+  }, [])
+
+  const handleStart = (mode: GameMode, difficulty: Difficulty) => {
+    router.push({ pathname: '/game', params: { mode, difficulty } })
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scroll} bounces={false}>
+        {/* ── TITLE BLOCK ── */}
+        <Animated.View style={[styles.titleBlock, { opacity: titleGlow }]}>
+          <Text style={styles.titleLine1}>CIRCLE</Text>
+          <Text style={styles.titleLine2}>FILLER</Text>
+        </Animated.View>
+
+        {/* Subtitle / tagline */}
+        <View style={styles.tagRow}>
+          <View style={styles.tagLine} />
+          <Text style={styles.tagText}>CONNECT FOUR</Text>
+          <View style={styles.tagLine} />
+        </View>
+
+        {/* ── CREDIT LINE ── */}
+        <View style={styles.creditRow}>
+          <View style={[styles.creditDot, { backgroundColor: COLORS.p1 }]} />
+          <View style={[styles.creditDot, { backgroundColor: COLORS.p2 }]} />
+          <View style={[styles.creditDot, { backgroundColor: COLORS.accent }]} />
+          <View style={[styles.creditDot, { backgroundColor: COLORS.win }]} />
+        </View>
+
+        {/* ── MODE SELECTOR ── */}
+        <ModeSelector onStart={handleStart} />
+
+        {/* ── FOOTER ── */}
+        <View style={styles.footer}>
+          <View style={styles.footerRule} />
+          <Text style={styles.footerText}>POWERED BY SOLANA</Text>
+          <Text style={styles.footerVersion}>SEEKER EDITION v1.0</Text>
+        </View>
+      </ScrollView>
+
+      {/* CRT overlay effects */}
+      <CRTScanlines />
+      <CRTVignette />
+
+      <StatusBar style="light" />
+    </SafeAreaView>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.bg,
+  },
+  scroll: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 32,
+    gap: 20,
+  },
+
+  // ── Title ──
+  titleBlock: {
+    alignItems: 'center',
+  },
+  titleLine1: {
+    color: COLORS.text,
+    fontSize: 48,
+    fontWeight: '900',
+    letterSpacing: 14,
+    textShadowColor: COLORS.accentDim,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 30,
+  },
+  titleLine2: {
+    color: COLORS.accent,
+    fontSize: 48,
+    fontWeight: '900',
+    letterSpacing: 14,
+    marginTop: -10,
+    textShadowColor: COLORS.accent,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 40,
+  },
+
+  // ── Tagline ──
+  tagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  tagLine: {
+    width: 28,
+    height: 1,
+    backgroundColor: COLORS.cellBorder,
+  },
+  tagText: {
+    color: COLORS.textDim,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 6,
+  },
+
+  // ── Credit dots ──
+  creditRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 4,
+  },
+  creditDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    opacity: 0.6,
+  },
+
+  // ── Footer ──
+  footer: {
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 6,
+  },
+  footerRule: {
+    width: 40,
+    height: 1,
+    backgroundColor: COLORS.accent,
+    marginBottom: 4,
+    opacity: 0.5,
+  },
+  footerText: {
+    color: COLORS.accent,
+    fontSize: 8,
+    fontWeight: '800',
+    letterSpacing: 4,
+    opacity: 0.7,
+    textShadowColor: COLORS.accent,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
+  },
+  footerVersion: {
+    color: COLORS.p1,
+    fontSize: 8,
+    fontWeight: '600',
+    letterSpacing: 2,
+    opacity: 0.6,
+  },
+
+  // ── CRT Effects ──
+  scanlines: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  scanlineRow: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.15)',
+    marginBottom: 2,
+  },
+  vignette: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 0,
+    borderWidth: 40,
+    borderColor: 'rgba(0,0,0,0.25)',
+    // Fake vignette via thick transparent-ish border
+    opacity: 1,
+  },
+})
