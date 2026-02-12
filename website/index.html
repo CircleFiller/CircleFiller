@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circle Filler — 4-in-a-Row on Solana</title>
+  <meta name="description" content="A retro 4-in-a-row game built for Solana Seeker. One dev, one mission — fill every ring.">
+  <meta name="theme-color" content="#0a0a0f">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Circle Filler — 4-in-a-Row on Solana">
+  <meta property="og:description" content="A retro 4-in-a-row game built for Solana Seeker. One dev, one mission — fill every ring.">
+  <meta property="og:image" content="https://circlefiller.dev/assets/banner.png">
+  <meta property="og:url" content="https://circlefiller.dev">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Circle Filler — 4-in-a-Row on Solana">
+  <meta name="twitter:description" content="A retro 4-in-a-row game built for Solana Seeker. One dev, one mission — fill every ring.">
+  <meta name="twitter:image" content="https://circlefiller.dev/assets/banner.png">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
+  <link rel="apple-touch-icon" href="/assets/favicon-192.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="cabinet">
+    <!-- Corner rivets -->
+    <div class="rivet rivet--tl"></div>
+    <div class="rivet rivet--tr"></div>
+    <div class="rivet rivet--bl"></div>
+    <div class="rivet rivet--br"></div>
+
+    <!-- ====== MARQUEE ====== -->
+    <header class="marquee">
+      <h1 class="marquee__title">CIRCLE <span>FILLER</span></h1>
+    </header>
+
+    <!-- ====== CRT SCREEN ====== -->
+    <main class="crt">
+      <div class="crt__inner">
+
+        <!-- HERO / TITLE SCREEN -->
+        <section class="hero">
+          <!-- Inline logo SVG with prefixed filter IDs -->
+          <svg class="hero__logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="96" height="96" aria-label="Circle Filler logo">
+            <defs>
+              <filter id="cf-outer-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur"/>
+                <feColorMatrix in="blur" type="matrix"
+                  values="0 0 0 0 0
+                          0 0 0 0 0.96
+                          0 0 0 0 0.83
+                          0 0 0 0.6 0" result="colored"/>
+                <feComposite in="SourceGraphic" in2="colored" operator="over"/>
+              </filter>
+              <filter id="cf-text-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+                <feColorMatrix in="blur" type="matrix"
+                  values="0 0 0 0 0
+                          0 0 0 0 0.96
+                          0 0 0 0 0.83
+                          0 0 0 0.5 0" result="colored"/>
+                <feComposite in="SourceGraphic" in2="colored" operator="over"/>
+              </filter>
+              <pattern id="cf-scanlines" x="0" y="0" width="512" height="6" patternUnits="userSpaceOnUse">
+                <rect x="0" y="0" width="512" height="3" fill="transparent"/>
+                <rect x="0" y="3" width="512" height="3" fill="rgba(0,0,0,0.35)"/>
+              </pattern>
+            </defs>
+            <rect width="512" height="512" rx="64" fill="#0a0a0f"/>
+            <circle cx="256" cy="256" r="180" fill="none" stroke="#00f5d4" stroke-width="36" stroke-linecap="round" stroke-dasharray="879.6 251.4" stroke-dashoffset="100" filter="url(#cf-outer-glow)"/>
+            <g filter="url(#cf-text-glow)" transform="translate(256,256)">
+              <path d="M -78,-70 L 8,-70 L 8,-42 L -48,-42 L -48,42 L 8,42 L 8,70 L -78,70 Z" fill="#e0e0e0"/>
+              <path d="M 8,-70 L 28,-70 L 16,-42 L 8,-42 Z" fill="#e0e0e0"/>
+              <path d="M 8,42 L 16,42 L 28,70 L 8,70 Z" fill="#e0e0e0"/>
+              <path d="M 38,-70 L 68,-70 L 68,70 L 38,70 Z" fill="#00f5d4"/>
+              <path d="M 68,-70 L 100,-70 L 100,-42 L 68,-42 Z" fill="#00f5d4"/>
+              <path d="M 68,-14 L 94,-14 L 86,12 L 68,12 Z" fill="#00f5d4"/>
+            </g>
+            <rect width="512" height="512" rx="64" fill="url(#cf-scanlines)"/>
+          </svg>
+
+          <div class="hero__title-line hero__title-line--white">CIRCLE</div>
+          <div class="hero__title-line hero__title-line--cyan">FILLER</div>
+
+          <div class="hero__tagrow">
+            <span class="hero__tagline-rule"></span>
+            <span class="hero__tagline">4 - IN - A - ROW</span>
+            <span class="hero__tagline-rule"></span>
+          </div>
+
+          <div class="hero__press-start">PRESS START</div>
+          <div class="hero__insert-coin">INSERT COIN</div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- SCREENSHOTS -->
+        <section class="screenshots">
+          <div class="screenshots__title">GAMEPLAY</div>
+          <div class="screenshots__grid">
+            <div class="screenshots__frame">
+              <img src="/assets/screenshots/01-home.png" alt="Home screen" loading="lazy" width="1200" height="630">
+              <div class="screenshots__label">HOME</div>
+            </div>
+            <div class="screenshots__frame">
+              <img src="/assets/screenshots/02-mode-select.png" alt="Mode selection" loading="lazy" width="1200" height="630">
+              <div class="screenshots__label">MODES</div>
+            </div>
+            <div class="screenshots__frame">
+              <img src="/assets/screenshots/03-gameplay.png" alt="In-game board" loading="lazy" width="1200" height="630">
+              <div class="screenshots__label">PLAY</div>
+            </div>
+            <div class="screenshots__frame">
+              <img src="/assets/screenshots/04-game-over.png" alt="Game over screen" loading="lazy" width="1200" height="630">
+              <div class="screenshots__label">VICTORY</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- THE STORY -->
+        <section class="story">
+          <div class="story__heading">CIRCLE FILLERS</div>
+          <div class="story__subheading">One dev. One mission. Every Seeker has a ring to fill.</div>
+          <p class="story__body">
+            Circle Filler is a retro 4-in-a-row game built from scratch for the Solana Seeker.
+            No ads. No data collection. No in-app purchases. Just pure, arcade-style fun
+            wrapped in a CRT glow.
+          </p>
+          <p class="story__body">
+            Challenge the AI across three difficulty levels or go head-to-head
+            with a friend on the same device. Drop your chips, fill the rows,
+            claim the win.
+          </p>
+          <div class="story__callout">Play 'n' Fill.</div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- FEATURES — SELECT MODE -->
+        <section class="features">
+          <div class="features__heading">SELECT MODE</div>
+          <div class="features__grid">
+            <div class="feature-card">
+              <span class="feature-card__icon">🤖</span>
+              <div class="feature-card__title">VS AI</div>
+              <div class="feature-card__desc">Three difficulty levels. Easy to learn, hard to master.</div>
+            </div>
+            <div class="feature-card">
+              <span class="feature-card__icon">🆚</span>
+              <div class="feature-card__title">1v1 LOCAL</div>
+              <div class="feature-card__desc">Pass and play. Two players, one screen, no mercy.</div>
+            </div>
+            <div class="feature-card">
+              <span class="feature-card__icon">🔒</span>
+              <div class="feature-card__title">ZERO DATA</div>
+              <div class="feature-card__desc">No accounts. No tracking. No ads. Your game, your device.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CRT FOOTER -->
+        <footer class="crt-footer">
+          <div class="crt-footer__rule"></div>
+          <div class="crt-footer__powered">POWERED BY SOLANA</div>
+          <div class="crt-footer__version">SEEKER EDITION v1.0</div>
+          <div class="crt-footer__motto">"You have circles, we fill them."</div>
+          <nav class="crt-footer__links">
+            <a href="/privacy" class="crt-footer__link">PRIVACY</a>
+            <a href="/license" class="crt-footer__link">LICENSE</a>
+            <a href="/copyright" class="crt-footer__link">COPYRIGHT</a>
+          </nav>
+          <div class="crt-footer__copy">&copy; 2025 Circle Fillers. All rights reserved.</div>
+        </footer>
+
+      </div>
+    </main>
+
+    <!-- ====== CONTROL PANEL ====== -->
+    <div class="controls" aria-hidden="true">
+      <div class="joystick">
+        <div class="joystick__base">
+          <div class="joystick__stick"></div>
+        </div>
+      </div>
+      <div class="buttons">
+        <div class="btn-arcade btn-arcade--cyan"></div>
+        <div class="btn-arcade btn-arcade--pink"></div>
+        <div class="btn-arcade btn-arcade--yellow"></div>
+      </div>
+      <div class="coin-slot">
+        <div class="coin-slot__slot"></div>
+        <div class="coin-slot__label">INSERT COIN</div>
+      </div>
+    </div>
+
+    <!-- ====== SPEAKER GRILLE ====== -->
+    <div class="speaker" aria-hidden="true">
+      <div class="speaker__grille"></div>
+      <div class="speaker__text">CIRCLE FILLERS &copy; 2025</div>
+    </div>
+  </div>
+</body>
+</html>
