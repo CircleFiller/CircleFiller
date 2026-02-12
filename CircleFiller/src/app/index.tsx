@@ -46,10 +46,13 @@ export default function HomeScreen() {
           <Text style={styles.titleLine2}>FILLER</Text>
         </Animated.View>
 
+        {/* Presents */}
+        <Text style={styles.presentsText}>Presents:</Text>
+
         {/* Subtitle / tagline */}
         <View style={styles.tagRow}>
           <View style={styles.tagLine} />
-          <Text style={styles.tagText}>CONNECT FOUR</Text>
+          <Text style={styles.tagText}>4 - IN - A - ROW</Text>
           <View style={styles.tagLine} />
         </View>
 
@@ -71,6 +74,9 @@ export default function HomeScreen() {
           <Text style={styles.footerVersion}>SEEKER EDITION v1.0</Text>
         </View>
       </ScrollView>
+
+      {/* ── MOTTO (pinned to bottom) ── */}
+      <Text style={styles.mottoText}>You have circles, we fill them.</Text>
 
       {/* CRT overlay effects */}
       <CRTScanlines />
@@ -103,6 +109,7 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: '900',
     letterSpacing: 14,
+    paddingLeft: 14,
     textShadowColor: COLORS.accentDim,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 30,
@@ -112,6 +119,7 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: '900',
     letterSpacing: 14,
+    paddingLeft: 14,
     marginTop: -10,
     textShadowColor: COLORS.accent,
     textShadowOffset: { width: 0, height: 0 },
@@ -127,13 +135,15 @@ const styles = StyleSheet.create({
   tagLine: {
     width: 28,
     height: 1,
-    backgroundColor: COLORS.cellBorder,
+    backgroundColor: COLORS.accent,
+    opacity: 0.6,
   },
   tagText: {
-    color: COLORS.textDim,
+    color: COLORS.text,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 6,
+    paddingLeft: 6,
   },
 
   // ── Credit dots ──
@@ -147,6 +157,22 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     opacity: 0.6,
+  },
+  mottoText: {
+    color: '#ff4d7a',
+    fontSize: 11,
+    fontStyle: 'italic',
+    fontWeight: '600',
+    letterSpacing: 1,
+    textAlign: 'center',
+    paddingBottom: 12,
+  },
+  presentsText: {
+    color: COLORS.text,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 3,
+    paddingLeft: 3,
   },
 
   // ── Footer ──
@@ -173,7 +199,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 8,
   },
   footerVersion: {
-    color: COLORS.p1,
+    color: '#ff4d7a',
     fontSize: 8,
     fontWeight: '600',
     letterSpacing: 2,
