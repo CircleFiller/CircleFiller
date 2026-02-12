@@ -1,5 +1,5 @@
 // useSound.ts — native: sound effects via expo-av with bundled audio files
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 import { Audio } from 'expo-av'
 
 // Bundled audio files (Metro resolves require() at build time)
@@ -10,6 +10,8 @@ export function useSound() {
   const dropSoundRef = useRef<Audio.Sound | null>(null)
   const popSoundRef = useRef<Audio.Sound | null>(null)
   const loaded = useRef(false)
+  const mutedRef = useRef(false)
+  const [muted, setMuted] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -46,7 +48,13 @@ export function useSound() {
     }
   }, [])
 
+  const toggleMute = useCallback(() => {
+    mutedRef.current = !mutedRef.current
+    setMuted(mutedRef.current)
+  }, [])
+
   const playDrop = useCallback(async () => {
+    if (mutedRef.current) return
     try {
       if (dropSoundRef.current) {
         await dropSoundRef.current.setPositionAsync(0)
@@ -56,6 +64,7 @@ export function useSound() {
   }, [])
 
   const playWin = useCallback(async () => {
+    if (mutedRef.current) return
     try {
       if (popSoundRef.current) {
         await popSoundRef.current.setPositionAsync(0)
@@ -64,5 +73,5 @@ export function useSound() {
     } catch {}
   }, [])
 
-  return { playDrop, playWin }
+  return { playDrop, playWin, muted, toggleMute }
 }

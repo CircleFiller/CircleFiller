@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react'
-import { View, Text, Pressable, StyleSheet, SafeAreaView } from 'react-native'
+import { View, Text, Pressable, StyleSheet, Platform } from 'react-native'
+import { SafeAreaView } from 'react-native'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { COLORS } from '../theme/colors'
 import { GameMode, Difficulty } from '../game/types'
@@ -23,7 +24,7 @@ function CRTScanlines() {
 export default function GameScreen() {
   const router = useRouter()
   const params = useLocalSearchParams<{ mode?: string; difficulty?: string }>()
-  const { playDrop, playWin } = useSound()
+  const { playDrop, playWin, muted, toggleMute } = useSound()
 
   const mode = (params.mode as GameMode) || 'ai'
   const difficulty = (params.difficulty as Difficulty) || 'medium'
@@ -72,7 +73,15 @@ export default function GameScreen() {
   const gameOver = state.phase === 'won' || state.phase === 'draw'
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      {/* Sound toggle — absolute so it never affects layout */}
+      <Pressable
+        onPress={toggleMute}
+        style={({ pressed }) => [styles.muteBtn, pressed && { opacity: 0.6 }]}
+      >
+        <Text style={styles.muteIcon}>{muted ? '\u{1F507}' : '\u{1F50A}'}</Text>
+      </Pressable>
+
       {/* ── Top bar ── */}
       <View style={styles.topBar}>
         <Pressable
@@ -129,7 +138,7 @@ export default function GameScreen() {
       )}
 
       {/* CRT overlay — excluded from game screen, interferes with board visibility */}
-    </SafeAreaView>
+    </View>
   )
 }
 
@@ -204,6 +213,16 @@ const styles = StyleSheet.create({
   },
   topBarRight: {
     minWidth: 70,
+  },
+  muteBtn: {
+    position: 'absolute',
+    top: 14,
+    right: 16,
+    zIndex: 10,
+    padding: 2,
+  },
+  muteIcon: {
+    fontSize: 12,
   },
 
   separator: {

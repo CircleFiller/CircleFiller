@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react'
-import { View, Text, StyleSheet, Animated } from 'react-native'
+import React from 'react'
+import { View, Text, StyleSheet, Platform } from 'react-native'
 import { COLORS } from '../theme/colors'
 import { Player, GameMode, Difficulty } from '../game/types'
 
@@ -12,73 +12,28 @@ interface GameHeaderProps {
   aiThinking?: boolean
 }
 
-function ThinkingPulse() {
-  const opacity = useRef(new Animated.Value(0.3)).current
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 1, duration: 400, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.3, duration: 400, useNativeDriver: true }),
-      ])
-    ).start()
-  }, [])
-  return (
-    <Animated.Text style={[styles.centerLabel, { color: COLORS.p2, opacity }]}>
-      THINKING
-    </Animated.Text>
-  )
-}
-
 function PlayerSide({ label, color, score, active, flip }: {
   label: string; color: string; score: number; active: boolean; flip?: boolean
 }) {
-  const glowAnim = useRef(new Animated.Value(0.4)).current
-
-  useEffect(() => {
-    if (active) {
-      Animated.loop(Animated.sequence([
-        Animated.timing(glowAnim, { toValue: 1, duration: 600, useNativeDriver: false }),
-        Animated.timing(glowAnim, { toValue: 0.4, duration: 600, useNativeDriver: false }),
-      ])).start()
-    } else {
-      glowAnim.stopAnimation()
-      glowAnim.setValue(0.4)
-    }
-  }, [active])
+  const shadow = active && Platform.OS === 'web'
+    ? { textShadow: `0 0 8px ${color}` } as any
+    : undefined
 
   return (
     <View style={[styles.side, flip && styles.sideFlip]}>
-      {/* Chip indicator */}
-      <Animated.View style={[
-        styles.chip,
-        {
-          backgroundColor: color,
-          shadowColor: color,
-          shadowOpacity: active ? glowAnim : 0,
-          shadowRadius: active ? 10 : 0,
-        },
-      ]} />
-
-      {/* Name + score */}
+      <View style={[styles.chip, { backgroundColor: color }]} />
       <View style={[styles.sideText, flip && styles.sideTextFlip]}>
         <Text style={[
           styles.playerName,
           { color: active ? color : COLORS.textDim },
-          active && { textShadowColor: color, textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 8 },
+          shadow,
         ]}>
           {label}
         </Text>
-        <Text style={[
-          styles.scoreText,
-          { color },
-          active && { textShadowColor: color, textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 12 },
-        ]}>
+        <Text style={[styles.scoreText, { color }, shadow]}>
           {score}
         </Text>
       </View>
-
-      {/* Active indicator line */}
-      {active && <View style={[styles.activeLine, { backgroundColor: color }]} />}
     </View>
   )
 }
@@ -95,24 +50,19 @@ export function GameHeader({ currentPlayer, mode, difficulty, scores, moveCount,
 
   return (
     <View style={styles.container}>
-      {/* P1 — left aligned */}
       <PlayerSide label={p1Label} color={COLORS.accent} score={scores.p1} active={p1Active} />
 
-      {/* Center — move counter + difficulty */}
       <View style={styles.center}>
-        {aiThinking ? (
-          <ThinkingPulse />
-        ) : (
-          <Text style={styles.centerLabel}>MOVE {moveCount + 1}</Text>
-        )}
+        <Text style={styles.centerLabel}>
+          {aiThinking ? 'THINKING' : `MOVE ${moveCount + 1}`}
+        </Text>
         {mode === 'ai' && (
-          <Text style={[styles.diffTag, { color: diffColor, textShadowColor: diffColor }]}>
+          <Text style={[styles.diffTag, { color: diffColor }]}>
             {difficulty.toUpperCase()}
           </Text>
         )}
       </View>
 
-      {/* P2 — right aligned */}
       <PlayerSide label={p2Label} color={COLORS.p1} score={scores.p2} active={p2Active} flip />
     </View>
   )
@@ -124,11 +74,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    paddingTop: 16,
+    paddingTop: 28,
     paddingBottom: 12,
   },
-
-  // ── Player side ──
   side: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -144,16 +92,13 @@ const styles = StyleSheet.create({
   sideTextFlip: {
     alignItems: 'flex-end',
   },
-
   chip: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 4,
   },
   playerName: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '900',
     letterSpacing: 2,
   },
@@ -162,16 +107,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     marginTop: -2,
   },
-  activeLine: {
-    position: 'absolute',
-    bottom: -6,
-    left: 0,
-    right: 0,
-    height: 1,
-    opacity: 0.6,
-  },
-
-  // ── Center ──
   center: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -187,7 +122,5 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 2,
     marginTop: 3,
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 6,
   },
 })

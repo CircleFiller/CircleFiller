@@ -1,5 +1,5 @@
 // useSound.web.ts — web: use Web Audio API to play bundled sound files
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useState } from 'react'
 
 // Bundled audio files (Metro resolves require() at build time)
 const DROP_SOUND = require('../../assets/sounds/chip_drop.wav')
@@ -9,6 +9,8 @@ export function useSound() {
   const ctxRef = useRef<AudioContext | null>(null)
   const dropBufferRef = useRef<AudioBuffer | null>(null)
   const popBufferRef = useRef<AudioBuffer | null>(null)
+  const mutedRef = useRef(false)
+  const [muted, setMuted] = useState(false)
 
   const getCtx = () => {
     if (!ctxRef.current) ctxRef.current = new AudioContext()
@@ -18,7 +20,6 @@ export function useSound() {
   const loadBuffer = async (src: any): Promise<AudioBuffer | null> => {
     try {
       const ctx = getCtx()
-      // Metro bundles require() as a URI string on web
       const uri = typeof src === 'number' ? src : (src?.uri || src?.default || src)
       const response = await fetch(uri)
       const arrayBuffer = await response.arrayBuffer()
@@ -28,7 +29,13 @@ export function useSound() {
     }
   }
 
+  const toggleMute = useCallback(() => {
+    mutedRef.current = !mutedRef.current
+    setMuted(mutedRef.current)
+  }, [])
+
   const playDrop = useCallback(async () => {
+    if (mutedRef.current) return
     try {
       const ctx = getCtx()
       if (!dropBufferRef.current) {
@@ -44,6 +51,7 @@ export function useSound() {
   }, [])
 
   const playWin = useCallback(async () => {
+    if (mutedRef.current) return
     try {
       const ctx = getCtx()
       if (!popBufferRef.current) {
@@ -58,5 +66,5 @@ export function useSound() {
     } catch {}
   }, [])
 
-  return { playDrop, playWin }
+  return { playDrop, playWin, muted, toggleMute }
 }
