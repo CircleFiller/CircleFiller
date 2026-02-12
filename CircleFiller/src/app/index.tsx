@@ -86,7 +86,6 @@ export default function HomeScreen() {
 
       {/* CRT overlay effects */}
       <CRTScanlines />
-      <CRTVignette />
 
       <StatusBar style="light" />
     </SafeAreaView>
@@ -179,7 +178,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 1,
     textAlign: 'center',
-    paddingBottom: 12,
+    paddingBottom: 18,
+    marginTop: -8,
   },
   presentsText: {
     color: COLORS.text,

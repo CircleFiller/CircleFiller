@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react'
-import { View, Text, Pressable, StyleSheet, Platform } from 'react-native'
-import { SafeAreaView } from 'react-native'
+import { View, Text, Pressable, StyleSheet, Platform, StatusBar } from 'react-native'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { COLORS } from '../theme/colors'
 import { GameMode, Difficulty } from '../game/types'
@@ -146,6 +145,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.bg,
+    paddingTop: StatusBar.currentHeight || 0,
   },
 
   // ── Top bar ──

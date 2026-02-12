@@ -1,7 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { View, Text, Pressable, StyleSheet, Animated } from 'react-native'
+import { View, Text, Pressable, StyleSheet, Animated, Dimensions } from 'react-native'
 import { COLORS } from '../theme/colors'
 import { Difficulty, GameMode } from '../game/types'
+
+const { width: SCREEN_W } = Dimensions.get('window')
+const CARD_GAP = 10
+const H_PAD = 20
+const CARD_W = (SCREEN_W - H_PAD * 2 - CARD_GAP * 2) / 3
 
 interface ModeSelectorProps {
   onStart: (mode: GameMode, difficulty: Difficulty) => void
@@ -46,7 +51,6 @@ function ModeCard({ icon, title, subtitle, color, active, disabled, onPress }: {
     <Pressable
       onPress={disabled ? undefined : onPress}
       style={({ pressed }) => [
-        styles.cardWrapper,
         pressed && !disabled && { opacity: 0.75 },
       ]}
     >
@@ -66,10 +70,8 @@ function ModeCard({ icon, title, subtitle, color, active, disabled, onPress }: {
         {/* Top accent line */}
         <View style={[styles.topAccent, { backgroundColor: color }]} />
 
-        {/* Fixed-position icon slot */}
-        <View style={styles.iconSlot}>
-          <Text style={styles.cardIcon}>{icon}</Text>
-        </View>
+        {/* Icon */}
+        <Text style={styles.cardIcon}>{icon}</Text>
 
         {/* Divider */}
         <View style={[styles.cardDivider, { backgroundColor: color + '30' }]} />
@@ -77,12 +79,10 @@ function ModeCard({ icon, title, subtitle, color, active, disabled, onPress }: {
         {/* Title */}
         <Text style={[styles.cardTitle, { textShadowColor: color }]}>{title}</Text>
 
-        {/* Subtitle — fixed height slot so cards match regardless of content */}
-        <View style={styles.subSlot}>
-          {subtitle ? (
-            <Text style={[styles.cardSub, disabled && { color: COLORS.textDim }]}>{subtitle}</Text>
-          ) : null}
-        </View>
+        {/* Subtitle */}
+        {subtitle ? (
+          <Text style={[styles.cardSub, disabled && { color: COLORS.textDim }]}>{subtitle}</Text>
+        ) : null}
 
         {/* Bottom accent line */}
         <View style={[styles.bottomAccent, { backgroundColor: color }]} />
@@ -96,7 +96,7 @@ export function ModeSelector({ onStart }: ModeSelectorProps) {
 
   return (
     <View style={styles.container}>
-      {/* Two cards side by side — identical size */}
+      {/* Three cards side by side */}
       <View style={styles.cardRow}>
         <ModeCard
           icon="🤖"
@@ -109,7 +109,7 @@ export function ModeSelector({ onStart }: ModeSelectorProps) {
         <ModeCard
           icon="👥"
           title="1 V 1"
-          subtitle="COMING SOON"
+          subtitle="SOON"
           color={COLORS.p1}
           disabled
           onPress={() => {}}
@@ -117,7 +117,7 @@ export function ModeSelector({ onStart }: ModeSelectorProps) {
         <ModeCard
           icon="🏆"
           title="BATTLE"
-          subtitle="COMING SOON"
+          subtitle="SOON"
           color={COLORS.p2}
           disabled
           onPress={() => {}}
@@ -159,33 +159,32 @@ export function ModeSelector({ onStart }: ModeSelectorProps) {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 24,
-    gap: 14,
+    paddingHorizontal: H_PAD,
+    gap: 12,
   },
 
   // ── Card grid ──
   cardRow: {
     flexDirection: 'row',
-    gap: 12,
+    justifyContent: 'center',
+    gap: CARD_GAP,
   },
 
-  cardWrapper: {
-    flex: 1,
-  },
-
-  // ── Card — fixed structure, identical for both ──
+  // ── Card — square-ish, compact ──
   card: {
-    height: 150,
+    width: CARD_W,
+    aspectRatio: 0.85,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.bg,
-    borderRadius: 14,
+    borderRadius: 12,
     borderWidth: 1.5,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
     shadowOffset: { width: 0, height: 0 },
     elevation: 8,
     overflow: 'hidden',
+    gap: 4,
   },
   cardDisabled: {
     opacity: 0.4,
@@ -193,11 +192,11 @@ const styles = StyleSheet.create({
 
   innerBorder: {
     position: 'absolute',
-    top: 4,
-    left: 4,
-    right: 4,
-    bottom: 4,
-    borderRadius: 10,
+    top: 3,
+    left: 3,
+    right: 3,
+    bottom: 3,
+    borderRadius: 9,
     borderWidth: 1,
   },
   topAccent: {
@@ -217,54 +216,42 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
 
-  iconSlot: {
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   cardIcon: {
-    fontSize: 30,
-    lineHeight: 36,
+    fontSize: 26,
     textAlign: 'center',
   },
   cardDivider: {
-    width: 24,
+    width: 20,
     height: 1,
-    marginVertical: 10,
   },
   cardTitle: {
     color: COLORS.text,
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: '900',
-    letterSpacing: 4,
-    marginTop: 2,
+    letterSpacing: 3,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 14,
     textAlign: 'center',
   },
-  subSlot: {
-    height: 18,
-    justifyContent: 'center',
-  },
   cardSub: {
     color: COLORS.textDim,
-    fontSize: 8,
+    fontSize: 7,
     fontWeight: '700',
-    letterSpacing: 3,
+    letterSpacing: 2,
     textAlign: 'center',
   },
 
   // ── Difficulty ──
   diffRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: CARD_GAP,
   },
   diffBtn: {
     flex: 1,
     backgroundColor: COLORS.bg,
     borderRadius: 10,
     borderWidth: 1,
-    paddingVertical: 14,
+    paddingVertical: 12,
     alignItems: 'center',
     justifyContent: 'center',
     shadowOffset: { width: 0, height: 0 },
@@ -273,7 +260,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   diffLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '900',
     letterSpacing: 2,
     textAlign: 'center',
@@ -287,8 +274,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   pulseText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '900',
-    letterSpacing: 5,
+    letterSpacing: 4,
   },
 })

@@ -25,7 +25,7 @@ function PlayerSide({ label, color, score, active, flip }: {
       <View style={[styles.sideText, flip && styles.sideTextFlip]}>
         <Text style={[
           styles.playerName,
-          { color: active ? color : COLORS.textDim },
+          { color },
           shadow,
         ]}>
           {label}
@@ -57,7 +57,7 @@ export function GameHeader({ currentPlayer, mode, difficulty, scores, moveCount,
           {aiThinking ? 'THINKING' : `MOVE ${moveCount + 1}`}
         </Text>
         {mode === 'ai' && (
-          <Text style={[styles.diffTag, { color: diffColor }]}>
+          <Text style={[styles.diffTag, { color: COLORS.text }]}>
             {difficulty.toUpperCase()}
           </Text>
         )}
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    paddingTop: 28,
+    paddingTop: 8,
     paddingBottom: 12,
   },
   side: {
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   centerLabel: {
-    color: COLORS.textDim,
+    color: COLORS.text,
     fontSize: 11,
     fontWeight: '900',
     letterSpacing: 3,

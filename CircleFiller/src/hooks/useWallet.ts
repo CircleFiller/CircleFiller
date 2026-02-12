@@ -1,6 +1,9 @@
-// useWallet.ts — native: delegates to MWA
-import { useMobileWallet } from '@wallet-ui/react-native-kit'
-
+// useWallet.ts — stub until wallet packages are re-added
 export function useWallet() {
-  return useMobileWallet()
+  return {
+    publicKey: null,
+    connected: false,
+    connect: () => console.log('[native] wallet not configured'),
+    disconnect: () => console.log('[native] wallet not configured'),
+  }
 }
