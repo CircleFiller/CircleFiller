@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Cyan glow for the ring -->
+    <filter id="outer-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0
+                0 0 0 0 0.96
+                0 0 0 0 0.83
+                0 0 0 0.6 0" result="colored"/>
+      <feComposite in="SourceGraphic" in2="colored" operator="over"/>
+    </filter>
+    <!-- Text glow -->
+    <filter id="text-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0
+                0 0 0 0 0.96
+                0 0 0 0 0.83
+                0 0 0 0.5 0" result="colored"/>
+      <feComposite in="SourceGraphic" in2="colored" operator="over"/>
+    </filter>
+    <!-- Scanline pattern — prominent arcade CRT lines -->
+    <pattern id="scanlines" x="0" y="0" width="512" height="6" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="512" height="3" fill="transparent"/>
+      <rect x="0" y="3" width="512" height="3" fill="rgba(0,0,0,0.35)"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="64" fill="#0a0a0f"/>
+
+  <!-- Ring: ~280deg arc, gap at top-right -->
+  <circle
+    cx="256" cy="256" r="180"
+    fill="none"
+    stroke="#00f5d4"
+    stroke-width="36"
+    stroke-linecap="round"
+    stroke-dasharray="879.6 251.4"
+    stroke-dashoffset="100"
+    filter="url(#outer-glow)"
+  />
+
+  <!-- CF Monogram — sharp geometric arcade letterforms -->
+  <g filter="url(#text-glow)" transform="translate(256,256)">
+
+    <!-- C — wide blocky with angled top-right cut (speed/tech feel) -->
+    <path d="
+      M -78,-70
+      L 8,-70
+      L 8,-42
+      L -48,-42
+      L -48,42
+      L 8,42
+      L 8,70
+      L -78,70
+      Z
+    " fill="#e0e0e0"/>
+    <!-- C top arm with angled cut -->
+    <path d="
+      M 8,-70
+      L 28,-70
+      L 16,-42
+      L 8,-42
+      Z
+    " fill="#e0e0e0"/>
+    <!-- C bottom arm with angled cut -->
+    <path d="
+      M 8,42
+      L 16,42
+      L 28,70
+      L 8,70
+      Z
+    " fill="#e0e0e0"/>
+
+    <!-- F — cyan accent, blocky with angled crossbar end -->
+    <path d="
+      M 38,-70
+      L 68,-70
+      L 68,70
+      L 38,70
+      Z
+    " fill="#00f5d4"/>
+    <!-- F top bar -->
+    <path d="
+      M 68,-70
+      L 100,-70
+      L 100,-42
+      L 68,-42
+      Z
+    " fill="#00f5d4"/>
+    <!-- F mid bar with angled end -->
+    <path d="
+      M 68,-14
+      L 94,-14
+      L 86,12
+      L 68,12
+      Z
+    " fill="#00f5d4"/>
+  </g>
+
+  <!-- CRT Scanlines overlay -->
+  <rect width="512" height="512" rx="64" fill="url(#scanlines)"/>
+</svg>

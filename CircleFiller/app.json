@@ -3,13 +3,19 @@
     "scheme": "acme",
     "userInterfaceStyle": "automatic",
     "orientation": "default",
+    "icon": "./assets/icons/icon-1024.png",
     "web": {
-      "output": "static"
+      "output": "static",
+      "favicon": "./assets/icons/icon-32.png"
     },
     "name": "CircleFiller",
     "slug": "CircleFiller",
     "android": {
-      "package": "com.anonymous.kitexpouniwind"
+      "package": "com.anonymous.kitexpouniwind",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icons/icon-512.png",
+        "backgroundColor": "#0a0a0f"
+      }
     }
   }
 }
