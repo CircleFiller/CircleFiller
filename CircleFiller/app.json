@@ -16,6 +16,12 @@
         "foregroundImage": "./assets/icons/icon-512.png",
         "backgroundColor": "#0a0a0f"
       }
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7f4a647b-0746-4e84-838c-f517d971e76e"
+      }
+    },
+    "owner": "mrkix"
   }
 }

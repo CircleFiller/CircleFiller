@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Animated } from 'react-native'
+import { View, Text, Image, StyleSheet, SafeAreaView, ScrollView, Animated } from 'react-native'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { COLORS } from '../theme/colors'
@@ -40,6 +40,12 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll} bounces={false}>
+        {/* ── LOGO ── */}
+        <Image
+          source={require('../../assets/icons/icon-96.png')}
+          style={styles.logo}
+        />
+
         {/* ── TITLE BLOCK ── */}
         <Animated.View style={[styles.titleBlock, { opacity: titleGlow }]}>
           <Text style={styles.titleLine1}>CIRCLE</Text>
@@ -98,6 +104,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 32,
     gap: 20,
+  },
+
+  // ── Logo ──
+  logo: {
+    width: 96,
+    height: 96,
+    marginBottom: -8,
+    marginTop: -12,
   },
 
   // ── Title ──
